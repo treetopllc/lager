@@ -217,15 +217,15 @@ print({inline_bitstring, B}, _Max, _Options) when is_bitstring(B) ->
     SizeStr = integer_to_list(Size),
     {[ValueStr, $:, SizeStr], length(ValueStr) + length(SizeStr) +1};
 print(BitString, Max, Options) when is_bitstring(BitString) ->
-    case byte_size(BitString) > Max of
+    BL = case byte_size(BitString) > Max of
         true ->
-            BL = binary_to_list(BitString, 1, Max);
+            binary_to_list(BitString, 1, Max);
         _ ->
             R = erlang:bitstring_to_list(BitString),
             {Bytes, [Bits]} = lists:splitwith(fun erlang:is_integer/1, R),
             %% tag the trailing bits with a special tuple we catch when
             %% list_body calls print again
-            BL = Bytes ++ [{inline_bitstring, Bits}]
+            Bytes ++ [{inline_bitstring, Bits}]
     end,
     {X, Len0} = list_body(BL, Max - 4, dec_depth(Options), true),
     {["<<", X, ">>"], Len0 + 4};
